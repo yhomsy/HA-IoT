@@ -1,80 +1,102 @@
 blueprint:
-  name: Zigbee2MQTT - Moes ZT-B-EU3 Scene Switch (MQTT)
+  name: Zigbee2MQTT - Moes ZT-B-EU3 Scene Switch
   description: |
-    Control actions for the Moes ZT-B-EU3 wireless scene switch using MQTT triggers.
-    This blueprint works directly with MQTT messages and doesn't require a sensor entity.
-    Each button supports single press, double press, and long press actions.
+    Complete automation blueprint for the Moes ZT-B-EU3 wireless 3-button scene switch.
     
-    Compatible with Zigbee2MQTT integration.
+    Features:
+    - 3 buttons (Left, Middle, Right)
+    - 3 action types per button (Single press, Double press, Long press)
+    - Total of 9 configurable actions
+    - Works directly with MQTT - no sensor entity required
+    
+    Setup Instructions:
+    1. Pair your Moes ZT-B-EU3 with Zigbee2MQTT
+    2. Find the MQTT topic in Zigbee2MQTT (usually: zigbee2mqtt/YOUR_DEVICE_NAME)
+    3. Enter that exact topic in the "MQTT Topic" field below
+    4. Configure actions for each button press type
+    5. Save and test!
+    
+    Compatible with: Moes ZT-B-EU3 (Model: TS0043)
+    Requires: Zigbee2MQTT integration
   domain: automation
+  source_url: https://github.com/YOUR_USERNAME/YOUR_REPO/blob/main/moes_zt_b_eu3.yaml
   input:
     mqtt_topic:
       name: MQTT Topic
-      description: 'Enter the MQTT topic for your switch (e.g., zigbee2mqtt/Moes Sense SW 3 Gangs)'
-      default: "zigbee2mqtt/Moes Sense SW 3 Gangs"
+      description: |
+        Enter the exact MQTT topic for your switch from Zigbee2MQTT.
+        Find it in Zigbee2MQTT -> Click your device -> Look for "MQTT" section.
+        Example: zigbee2mqtt/Bedroom Scene Switch
       selector:
         text:
     
-    # Button 1 (Left) Actions
+    # ==================== BUTTON 1 (LEFT) ====================
     button_1_single:
       name: Button 1 (Left) - Single Press
       description: Action to run when button 1 is pressed once
       default: []
       selector:
         action: {}
+    
     button_1_double:
       name: Button 1 (Left) - Double Press
-      description: Action to run when button 1 is pressed twice
-      default: []
-      selector:
-        action: {}
-    button_1_hold:
-      name: Button 1 (Left) - Long Press
-      description: Action to run when button 1 is held
+      description: Action to run when button 1 is pressed twice quickly
       default: []
       selector:
         action: {}
     
-    # Button 2 (Middle) Actions
+    button_1_hold:
+      name: Button 1 (Left) - Long Press
+      description: Action to run when button 1 is held for 1-2 seconds
+      default: []
+      selector:
+        action: {}
+    
+    # ==================== BUTTON 2 (MIDDLE) ====================
     button_2_single:
       name: Button 2 (Middle) - Single Press
       description: Action to run when button 2 is pressed once
       default: []
       selector:
         action: {}
+    
     button_2_double:
       name: Button 2 (Middle) - Double Press
-      description: Action to run when button 2 is pressed twice
-      default: []
-      selector:
-        action: {}
-    button_2_hold:
-      name: Button 2 (Middle) - Long Press
-      description: Action to run when button 2 is held
+      description: Action to run when button 2 is pressed twice quickly
       default: []
       selector:
         action: {}
     
-    # Button 3 (Right) Actions
+    button_2_hold:
+      name: Button 2 (Middle) - Long Press
+      description: Action to run when button 2 is held for 1-2 seconds
+      default: []
+      selector:
+        action: {}
+    
+    # ==================== BUTTON 3 (RIGHT) ====================
     button_3_single:
       name: Button 3 (Right) - Single Press
       description: Action to run when button 3 is pressed once
       default: []
       selector:
         action: {}
+    
     button_3_double:
       name: Button 3 (Right) - Double Press
-      description: Action to run when button 3 is pressed twice
+      description: Action to run when button 3 is pressed twice quickly
       default: []
       selector:
         action: {}
+    
     button_3_hold:
       name: Button 3 (Right) - Long Press
-      description: Action to run when button 3 is held
+      description: Action to run when button 3 is held for 1-2 seconds
       default: []
       selector:
         action: {}
 
+# Automation mode: restart - allows new button presses to cancel ongoing actions
 mode: restart
 max_exceeded: silent
 
@@ -83,6 +105,7 @@ trigger:
     topic: !input mqtt_topic
 
 condition:
+  # Only proceed if the MQTT message contains an 'action' field
   - condition: template
     value_template: "{{ 'action' in trigger.payload_json }}"
 
@@ -91,44 +114,53 @@ action:
       command: "{{ trigger.payload_json.action }}"
   
   - choose:
-      # Button 1 (Left)
+      # ==================== BUTTON 1 ACTIONS ====================
       - conditions:
           - condition: template
             value_template: "{{ command == '1_single' }}"
         sequence: !input button_1_single
+      
       - conditions:
           - condition: template
             value_template: "{{ command == '1_double' }}"
         sequence: !input button_1_double
+      
       - conditions:
           - condition: template
             value_template: "{{ command == '1_hold' }}"
         sequence: !input button_1_hold
       
-      # Button 2 (Middle)
+      # ==================== BUTTON 2 ACTIONS ====================
       - conditions:
           - condition: template
             value_template: "{{ command == '2_single' }}"
         sequence: !input button_2_single
+      
       - conditions:
           - condition: template
             value_template: "{{ command == '2_double' }}"
         sequence: !input button_2_double
+      
       - conditions:
           - condition: template
             value_template: "{{ command == '2_hold' }}"
         sequence: !input button_2_hold
       
-      # Button 3 (Right)
+      # ==================== BUTTON 3 ACTIONS ====================
       - conditions:
           - condition: template
             value_template: "{{ command == '3_single' }}"
         sequence: !input button_3_single
+      
       - conditions:
           - condition: template
             value_template: "{{ command == '3_double' }}"
         sequence: !input button_3_double
+      
       - conditions:
           - condition: template
             value_template: "{{ command == '3_hold' }}"
         sequence: !input button_3_hold
+    
+    # If no conditions match, do nothing (gracefully ignore unknown actions)
+    default: []
