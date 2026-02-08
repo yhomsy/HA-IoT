@@ -1,0 +1,140 @@
+blueprint:
+  name: Zigbee2MQTT - Moes ZT-B-EU3 Scene Switch
+  description: |
+    Control actions for the Moes ZT-B-EU3 wireless scene switch.
+    This is a battery-powered 3-button scene controller (not a relay switch).
+    Each button supports single press, double press, and long press actions.
+    
+    Compatible with Zigbee2MQTT integration.
+  domain: automation
+  input:
+    switch:
+      name: Moes ZT-B-EU3 Scene Switch
+      description: Select the Moes ZT-B-EU3 scene switch device
+      selector:
+        device:
+          integration: mqtt
+          manufacturer: _TZ3000_bi6lpsew
+          multiple: false
+    
+    # Button 1 (Left) Actions
+    button_1_single:
+      name: Button 1 (Left) - Single Press
+      description: Action to run when button 1 is pressed once
+      default: []
+      selector:
+        action: {}
+    button_1_double:
+      name: Button 1 (Left) - Double Press
+      description: Action to run when button 1 is pressed twice
+      default: []
+      selector:
+        action: {}
+    button_1_hold:
+      name: Button 1 (Left) - Long Press
+      description: Action to run when button 1 is held
+      default: []
+      selector:
+        action: {}
+    
+    # Button 2 (Middle) Actions
+    button_2_single:
+      name: Button 2 (Middle) - Single Press
+      description: Action to run when button 2 is pressed once
+      default: []
+      selector:
+        action: {}
+    button_2_double:
+      name: Button 2 (Middle) - Double Press
+      description: Action to run when button 2 is pressed twice
+      default: []
+      selector:
+        action: {}
+    button_2_hold:
+      name: Button 2 (Middle) - Long Press
+      description: Action to run when button 2 is held
+      default: []
+      selector:
+        action: {}
+    
+    # Button 3 (Right) Actions
+    button_3_single:
+      name: Button 3 (Right) - Single Press
+      description: Action to run when button 3 is pressed once
+      default: []
+      selector:
+        action: {}
+    button_3_double:
+      name: Button 3 (Right) - Double Press
+      description: Action to run when button 3 is pressed twice
+      default: []
+      selector:
+        action: {}
+    button_3_hold:
+      name: Button 3 (Right) - Long Press
+      description: Action to run when button 3 is held
+      default: []
+      selector:
+        action: {}
+
+mode: restart
+max_exceeded: silent
+
+trigger:
+  - platform: event
+    event_type: state_changed
+
+variables:
+  switch_name: "{{ device_attr(switch, 'name') | lower | replace(' ', '_') }}"
+
+condition:
+  - condition: template
+    value_template: >-
+      {{ trigger.event.data.entity_id == 'sensor.' ~ switch_name ~ '_action' }}
+
+action:
+  - variables:
+      command: "{{ trigger.event.data.new_state.state }}"
+  
+  - choose:
+      # Button 1 (Left)
+      - conditions:
+          - condition: template
+            value_template: "{{ command == '1_single' }}"
+        sequence: !input button_1_single
+      - conditions:
+          - condition: template
+            value_template: "{{ command == '1_double' }}"
+        sequence: !input button_1_double
+      - conditions:
+          - condition: template
+            value_template: "{{ command == '1_hold' }}"
+        sequence: !input button_1_hold
+      
+      # Button 2 (Middle)
+      - conditions:
+          - condition: template
+            value_template: "{{ command == '2_single' }}"
+        sequence: !input button_2_single
+      - conditions:
+          - condition: template
+            value_template: "{{ command == '2_double' }}"
+        sequence: !input button_2_double
+      - conditions:
+          - condition: template
+            value_template: "{{ command == '2_hold' }}"
+        sequence: !input button_2_hold
+      
+      # Button 3 (Right)
+      - conditions:
+          - condition: template
+            value_template: "{{ command == '3_single' }}"
+        sequence: !input button_3_single
+      - conditions:
+          - condition: template
+            value_template: "{{ command == '3_double' }}"
+        sequence: !input button_3_double
+      - conditions:
+          - condition: template
+            value_template: "{{ command == '3_hold' }}"
+        sequence: !input button_3_hold
