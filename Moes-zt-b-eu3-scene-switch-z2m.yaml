@@ -14,7 +14,7 @@ blueprint:
       selector:
         device:
           integration: mqtt
-          manufacturer: _TZ3000_bi6lpsew
+          manufacturer: _TZ3000_gbm10jnj
           multiple: false
     
     # Button 1 (Left) Actions
