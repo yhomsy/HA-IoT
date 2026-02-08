@@ -8,14 +8,14 @@ blueprint:
     Compatible with Zigbee2MQTT integration.
   domain: automation
   input:
-    switch:
+    remote:
       name: Moes ZT-B-EU3 Scene Switch
-      description: Select the Moes ZT-B-EU3 scene switch device
+      description: Select the Moes ZT-B-EU3 scene switch
       selector:
-        device:
-          integration: mqtt
-          manufacturer: _TZ3000_gbm10jnj
-          multiple: false
+        entity:
+          filter:
+            - integration: mqtt
+              domain: sensor
     
     # Button 1 (Left) Actions
     button_1_single:
@@ -81,20 +81,16 @@ mode: restart
 max_exceeded: silent
 
 trigger:
-  - platform: event
-    event_type: state_changed
-
-variables:
-  switch_name: "{{ device_attr(switch, 'name') | lower | replace(' ', '_') }}"
+  - platform: state
+    entity_id: !input remote
 
 condition:
   - condition: template
-    value_template: >-
-      {{ trigger.event.data.entity_id == 'sensor.' ~ switch_name ~ '_action' }}
+    value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
 
 action:
   - variables:
-      command: "{{ trigger.event.data.new_state.state }}"
+      command: "{{ trigger.to_state.state }}"
   
   - choose:
       # Button 1 (Left)
