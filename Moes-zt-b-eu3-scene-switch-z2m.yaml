@@ -1,21 +1,19 @@
 blueprint:
-  name: Zigbee2MQTT - Moes ZT-B-EU3 Scene Switch
+  name: Zigbee2MQTT - Moes ZT-B-EU3 Scene Switch (MQTT)
   description: |
-    Control actions for the Moes ZT-B-EU3 wireless scene switch.
-    This is a battery-powered 3-button scene controller (not a relay switch).
+    Control actions for the Moes ZT-B-EU3 wireless scene switch using MQTT triggers.
+    This blueprint works directly with MQTT messages and doesn't require a sensor entity.
     Each button supports single press, double press, and long press actions.
     
     Compatible with Zigbee2MQTT integration.
   domain: automation
   input:
-    remote:
-      name: Moes ZT-B-EU3 Scene Switch
-      description: Select the Moes ZT-B-EU3 scene switch
+    mqtt_topic:
+      name: MQTT Topic
+      description: 'Enter the MQTT topic for your switch (e.g., zigbee2mqtt/Moes Sense SW 3 Gangs)'
+      default: "zigbee2mqtt/Moes Sense SW 3 Gangs"
       selector:
-        entity:
-          filter:
-            - integration: mqtt
-              domain: sensor
+        text:
     
     # Button 1 (Left) Actions
     button_1_single:
@@ -81,16 +79,16 @@ mode: restart
 max_exceeded: silent
 
 trigger:
-  - platform: state
-    entity_id: !input remote
+  - platform: mqtt
+    topic: !input mqtt_topic
 
 condition:
   - condition: template
-    value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
+    value_template: "{{ 'action' in trigger.payload_json }}"
 
 action:
   - variables:
-      command: "{{ trigger.to_state.state }}"
+      command: "{{ trigger.payload_json.action }}"
   
   - choose:
       # Button 1 (Left)
